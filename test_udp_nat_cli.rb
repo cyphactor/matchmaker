@@ -60,7 +60,7 @@ class MatchMaker
             puts "Response from #{remote_addr}:#{remote_port} is #{data[0]}"
           end
         end
-      else if mode == 'initiator'
+      elsif mode == 'initiator'
         udp_out = UDPSocket.new
         udp_out.bind('', 6311)
         loop do
