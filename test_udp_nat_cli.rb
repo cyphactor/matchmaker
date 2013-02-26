@@ -5,6 +5,8 @@ require 'socket'
 node_id = ARGV[0]
 remote_node_id = ARGV[1]
 
+PUNCH_PORT = 8342
+
 class MatchMaker
   def initialize
     @s = UDPSocket.new
@@ -45,18 +47,18 @@ class MatchMaker
     if action == 'connect' && response == 'success'
       puts "Received external ip (#{rem_ip}), port (#{rem_port}), mode (#{mode})"
       if mode == 'listen'
-        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{6311})"
+        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{PUNCH_PORT})"
         punch = UDPSocket.new
-        punch.bind('', 6311)
-        punch.send('now-it-is-something', 0, rem_ip, 6311)
+        punch.bind('', PUNCH_PORT)
+        punch.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
         punch.close
         puts "Punched hole."
 
         puts "Listening for data"
         # Bind for receiving
         udp_in = UDPSocket.new
-        udp_in.bind('0.0.0.0', 6311)
-        puts "Binding to local port 6311"
+        udp_in.bind('0.0.0.0', PUNCH_PORT)
+        puts "Binding to local port PUNCH_PORT"
 
         loop do
           # Receive data or time out after 5 seconds
@@ -68,18 +70,18 @@ class MatchMaker
           end
         end
       elsif mode == 'initiate'
-        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{6311})"
-        punch = UDPSocket.new
-        punch.bind('', 6311)
-        punch.send('now-it-is-something', 0, rem_ip, 6311)
-        punch.close
-        puts "Punched hole."
+        # puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{PUNCH_PORT})"
+        # punch = UDPSocket.new
+        # punch.bind('', PUNCH_PORT)
+        # punch.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
+        # punch.close
+        # puts "Punched hole."
 
         udp_out = UDPSocket.new
-        udp_out.bind('', 6311)
+        udp_out.bind('', PUNCH_PORT)
         loop do
-          udp_out.send("time:#{Time.now.to_s}", 0, rem_ip, 6311)
-          puts "Sent time to #{rem_ip}:#{6311}"
+          udp_out.send("time:#{Time.now.to_s}", 0, rem_ip, PUNCH_PORT)
+          puts "Sent time to #{rem_ip}:#{PUNCH_PORT}"
           sleep 2
         end
       else
