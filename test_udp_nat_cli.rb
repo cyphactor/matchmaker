@@ -33,11 +33,17 @@ class MatchMaker
     puts "Trying to connect to '#{remote_node_id}'..."
     @s.send("connect:#{remote_node_id}", 0, @host, @port)
     payload, sender = @s.recvfrom(@payload_size * 10)
-
     action, response, rem_ip, rem_port, mode = payload.split(':')
+    while action == 'connect' && response == 'pending' do
+      sleep 1
+      @s.send("connect:#{remote_node_id}", 0, @host, @port)
+      payload, sender = @s.recvfrom(@payload_size * 10)
+      action, response, rem_ip, rem_port, mode = payload.split(':')
+    end
+
     if action == 'connect' && response == 'success'
       puts "Received external ip (#{rem_ip}), port (#{rem_port}), mode (#{mode})"
-      if mode == 'listener'
+      if mode == 'listen'
         puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{6311})"
         punch = UDPSocket.new
         punch.bind('', 6311)
@@ -60,7 +66,7 @@ class MatchMaker
             puts "Response from #{remote_addr}:#{remote_port} is #{data[0]}"
           end
         end
-      elsif mode == 'initiator'
+      elsif mode == 'initiate'
         udp_out = UDPSocket.new
         udp_out.bind('', 6311)
         loop do
