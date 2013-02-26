@@ -2,10 +2,8 @@
 
 require 'socket'
 
-# remote_node_id = ARGV.first
-remote_node_id = 'brian'
-
-NODE_ID = 'drew'
+node_id = ARGV.first
+remote_node_id = ARGV.second
 
 class MatchMaker
   def initialize
@@ -21,7 +19,7 @@ class MatchMaker
     payload, sender = @s.recvfrom(@payload_size)
     action, data = payload.split(':')
     if action == 'register' && data == 'success'
-      puts "Successfully registered '#{NODE_ID}'."
+      puts "Successfully registered '#{node_id}'."
       return true
     else
       return false
@@ -39,7 +37,7 @@ class MatchMaker
 end
 
 mm = MatchMaker.new
-if mm.register(NODE_ID)
+if mm.register(node_id)
   mm.connect(remote_node_id)
 else
   puts "ERROR: Failed to register successfully."
