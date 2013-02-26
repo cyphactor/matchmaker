@@ -8,7 +8,7 @@ remote_node_id = ARGV[1]
 class MatchMaker
   def initialize
     @s = UDPSocket.new
-    # s.bind('', 8341)
+    @s.bind('0.0.0.0', 8341)
     @host = 'util.devscapades.com'
     @port = 9523
     @payload_size = 16
@@ -32,10 +32,10 @@ class MatchMaker
   def connect(remote_node_id)
     puts "Trying to connect to '#{remote_node_id}'..."
     @s.send("connect:#{remote_node_id}", 0, @host, @port)
-    payload, sender = @s.recvfrom(@payload_size)
-    action, data = payload.split(':')
-    puts action
-    puts data
+    payload, sender = @s.recvfrom(@payload_size * 10)
+
+    payload_array = payload.split(':')
+    puts payload_array.inspect
   end
 end
 
