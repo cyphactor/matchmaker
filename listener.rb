@@ -1,3 +1,4 @@
+
 require 'socket'
 
 punch = UDPSocket.new
@@ -23,7 +24,7 @@ loop do
     else
       peer = @sessions[data]
       listener.send("connect:success:#{peer[:client_ip]}:#{peer[:client_port]}", 0, sender_ip, sender_port)
-      listener.send("connect:success:#{sender_ip}:#{sender_port}", 0, peer[:client_ip], peer[:sender_port])
+      listener.send("connect:success:#{sender_ip}:#{sender_port}", 0, peer[:client_ip], peer[:client_port])
     end
   end
   # punch.send('', 0, sender_ip, sender_port)
