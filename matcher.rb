@@ -29,11 +29,11 @@ loop do
     else
       peer = @sessions[data]
       if peer[:randomized]
-        listener.send("connect:success:#{peer[:client_ip]}:#{peer[:client_port]}:initiator", 0, sender_ip, sender_port)
-        listener.send("connect:success:#{sender_ip}:#{sender_port}:listen", 0, peer[:client_ip], peer[:client_port])
-      else
         listener.send("connect:success:#{peer[:client_ip]}:#{peer[:client_port]}:listen", 0, sender_ip, sender_port)
-        listener.send("connect:success:#{sender_ip}:#{sender_port}:initiator", 0, peer[:client_ip], peer[:client_port])
+        listener.send("connect:success:#{sender_ip}:#{sender_port}:initiate", 0, peer[:client_ip], peer[:client_port])
+      else
+        listener.send("connect:success:#{peer[:client_ip]}:#{peer[:client_port]}:initiate", 0, sender_ip, sender_port)
+        listener.send("connect:success:#{sender_ip}:#{sender_port}:listen", 0, peer[:client_ip], peer[:client_port])
       end
     end
   end
