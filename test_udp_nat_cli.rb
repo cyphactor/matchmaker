@@ -35,6 +35,7 @@ class MatchMaker
     payload, sender = @s.recvfrom(@payload_size * 10)
     action, response, rem_ip, rem_port, mode = payload.split(':')
     while action == 'connect' && response == 'pending' do
+      print "."
       sleep 1
       @s.send("connect:#{remote_node_id}", 0, @host, @port)
       payload, sender = @s.recvfrom(@payload_size * 10)
@@ -71,11 +72,14 @@ class MatchMaker
         udp_out.bind('', 6311)
         loop do
           udp_out.send("time:#{Time.now.to_s}", 0, rem_ip, 6311)
+          puts "Sent time to #{rem_ip}:#{6311}"
           sleep 2
         end
       else
         puts "ERROR: Uknown connection mode"
       end
+    else
+      puts "ERROR: Unkown connection response"
     end
   end
 end
