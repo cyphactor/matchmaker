@@ -2,8 +2,8 @@
 
 require 'socket'
 
-node_id = ARGV.first
-remote_node_id = ARGV.second
+node_id = ARGV[0]
+remote_node_id = ARGV[1]
 
 class MatchMaker
   def initialize
