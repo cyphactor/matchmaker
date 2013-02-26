@@ -68,6 +68,13 @@ class MatchMaker
           end
         end
       elsif mode == 'initiate'
+        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{6311})"
+        punch = UDPSocket.new
+        punch.bind('', 6311)
+        punch.send('now-it-is-something', 0, rem_ip, 6311)
+        punch.close
+        puts "Punched hole."
+
         udp_out = UDPSocket.new
         udp_out.bind('', 6311)
         loop do
