@@ -50,7 +50,7 @@ class MatchMaker
       if mode == 'listen'
         puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{PUNCH_PORT})"
         punch = UDPSocket.new
-        punch.bind('', PUNCH_PORT)
+        # punch.bind('', PUNCH_PORT)
         punch.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
         punch.close
         puts "Punched hole."
