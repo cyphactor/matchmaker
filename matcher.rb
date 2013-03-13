@@ -1,9 +1,6 @@
 
 require 'socket'
 
-punch = UDPSocket.new
-punch.bind('', 6311)
-
 listener = UDPSocket.new
 listener.bind('0.0.0.0', 9523)
 
@@ -37,7 +34,6 @@ loop do
       end
     end
   end
-  # punch.send('', 0, sender_ip, sender_port)
   puts "GOT MESSAGE FROM #{sender_ip} #{payload}"
   sleep 1
 end
