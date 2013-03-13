@@ -10,7 +10,8 @@ PUNCH_PORT = 8342
 class MatchMaker
   def initialize
     @s = UDPSocket.new
-    @s.bind('', 8341)
+    #@s.bind('', 8341)
+    @s.bind('', PUNCH_PORT)
     @host = 'util.devscapades.com'
     @port = 9523
     @payload_size = 16
@@ -70,25 +71,16 @@ class MatchMaker
           end
         end
       elsif mode == 'initiate'
-        # puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{PUNCH_PORT})"
-        # punch = UDPSocket.new
-        # punch.bind('', PUNCH_PORT)
-        # punch.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
-        # punch.close
-        # puts "Punched hole."
-
         udp_out = UDPSocket.new
         udp_out.bind('', PUNCH_PORT)
         loop do
-          udp_out.send("time:#{Time.now.to_s}", 0, rem_ip, PUNCH_PORT)
-          puts "Sent time to #{rem_ip}:#{PUNCH_PORT}"
+          udp_out.send("time:#{Time.now.to_s}", 0, rem_ip, rem_port)
+          puts "Sent time to #{rem_ip}:#{rem_port}"
           sleep 2
         end
       else
         puts "ERROR: Uknown connection mode"
       end
-    elsif action == 'connect' && response == 'fail'
-      puts "Connect Failed: #{rem_ip}"
     else
       puts "ERROR: Unkown connection response"
     end
