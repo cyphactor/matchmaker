@@ -48,20 +48,11 @@ class MatchMaker
     if action == 'connect' && response == 'success'
       puts "Received external ip (#{rem_ip}), port (#{rem_port}), mode (#{mode})"
       if mode == 'listen'
-        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{PUNCH_PORT})"
-        # punch = UDPSocket.new
-        # punch.bind('', PUNCH_PORT)
-        # punch.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
-        # punch.close
-        @s.send('now-it-is-something', 0, rem_ip, PUNCH_PORT)
+        puts "Punching hole in firewall for UDP host (#{rem_ip}) and port (#{rem_port})"
+        @s.send('now-it-is-something', 0, rem_ip, rem_port)
         puts "Punched hole."
 
         puts "Listening for data"
-        # Bind for receiving
-        # udp_in = UDPSocket.new
-        # udp_in.bind('0.0.0.0', PUNCH_PORT)
-        puts "Binding to local port PUNCH_PORT"
-
         loop do
           # Receive data or time out after 5 seconds
           if IO.select([@s], nil, nil, rand(4))
@@ -72,8 +63,6 @@ class MatchMaker
           end
         end
       elsif mode == 'initiate'
-        # udp_out = UDPSocket.new
-        # udp_out.bind('', PUNCH_PORT)
         loop do
           @s.send("time:#{Time.now.to_s}", 0, rem_ip, rem_port)
           puts "Sent time to #{rem_ip}:#{rem_port}"
