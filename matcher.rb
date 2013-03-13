@@ -25,7 +25,10 @@ loop do
       listener.send("connect:pending", 0, sender_ip, sender_port)
     else
       peer = @sessions[data]
-      if peer[:randomized]
+      if @randomized && peer[:randomized]
+        listener.send("connect:fail:randomized", 0, sender_ip, sender_port)
+        listener.send("connect:fail:randomized", 0, peer[:client_ip], peer[:client_port])
+      elsif peer[:randomized]
         listener.send("connect:success:#{peer[:client_ip]}:#{peer[:client_port]}:listen", 0, sender_ip, sender_port)
         listener.send("connect:success:#{sender_ip}:#{sender_port}:initiate", 0, peer[:client_ip], peer[:client_port])
       else
