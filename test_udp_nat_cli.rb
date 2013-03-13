@@ -87,6 +87,8 @@ class MatchMaker
       else
         puts "ERROR: Uknown connection mode"
       end
+    elsif action == 'connect' && response == 'fail'
+      puts "Connect Failed: #{rem_ip}"
     else
       puts "ERROR: Unkown connection response"
     end
