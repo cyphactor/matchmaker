@@ -5,6 +5,87 @@ require 'socket'
 node_id = ARGV[0]
 remote_node_id = ARGV[1]
 
+module MatchMaker
+  NAT_DISCOVERY_HOST = 'util.devscapades.com'
+  NAT_DISCOVERY_PORT_ONE = 9524
+  NAT_DISCOVERY_PORT_TWO = 9525
+  NAT_DISCOVERY_BIND_PORT = 8341
+  NAT_DISCOVERY_PAYLOAD_SIZE = 32 
+
+  class Client
+    def initialize
+      @nat_discovery_socket = UDPSocket.new
+      @nat_discovery_socket.bind('', NAT_DISCOVERY_BIND_PORT)
+    end
+
+    def discover_nat_type
+      loc_ip = get_local_ip
+
+      external_ip_one, external_port_one = discover_first_external_ip_and_port
+
+      if loc_ip == external_ip_one && NAT_DISCOVERY_BIND_PORT == external_port_one
+        # We can assume that we are on the public network, or that we are on the
+        # same network as the NAT discovery service, which should be on the public
+        # internet.
+        return :public
+      else # some kind of NATing going on
+        external_ip_two, external_port_two = discover_second_external_ip_and_port
+
+        if external_port_one == external_port_two
+          return :asymmetric
+        else
+          return :symmetric
+        end
+      end
+    end
+
+    private
+
+    def discover_first_external_ip_and_port
+      @nat_discovery_socket.send("NAT discovery request one", 0, NAT_DISCOVERY_HOST, NAT_DISCOVERY_PORT_ONE)
+      payload, sender = @nat_discovery_socket.recvfrom(NAT_DISCOVERY_PAYLOAD_SIZE)
+      external_ip_one, external_port_one = payload.split(':')
+      return [external_ip_one, external_port_one]
+    end
+
+    def discover_second_external_ip_and_port
+      @nat_discovery_socket.send("NAT discovery requset one", 0, NAT_DISCOVERY_HOST, NAT_DISCOVERY_PORT_TWO)
+      payload, sender = @nat_discovery_socket.recvfrom(NAT_DISCOVERY_PAYLOAD_SIZE)
+      external_ip_two, external_port_two = payload.split(':')
+      return [external_ip_two, external_port_two]
+    end
+
+    def get_local_ip
+      # turn off reverse DNS resolution
+      orig_dnrl = Socket.do_not_reverse_lookup
+      Socket.do_not_reverse_lookup = true
+
+      UDPSocket.open do |s|
+        s.connect(NAT_DISCOVERY_HOST, 8000)
+        s.addr.last
+      end
+    ensure
+      # restore DNS resolution
+      Socket.do_not_reverse_lookup = orig_dnrl
+    end
+  end
+end
+
+
+client = MatchMaker::Client.new
+nat_type = client.discover_nat_type
+puts "NAT type: #{nat_type.inspect}"
+
+exit(0)
+
+
+    # In this case we should be able to send traffic from the src port I want
+    # to receive a connection on to the matchmaker. The matchmaker would then
+    # get my external port for that src port and tell the node I want to
+    # connect to. The matchmaker would also tell my node what the external
+    # port is for the node I want to connect to so that a connection can be
+    # initiated.
+
 PUNCH_PORT = 8342
 
 class MatchMaker
@@ -77,8 +158,8 @@ class MatchMaker
   end
 end
 
-mm = MatchMaker.new
-if mm.register(node_id)
-  mm.connect(remote_node_id)
-end
+# mm = MatchMaker.new
+# if mm.register(node_id)
+#   mm.connect(remote_node_id)
+# end
 
